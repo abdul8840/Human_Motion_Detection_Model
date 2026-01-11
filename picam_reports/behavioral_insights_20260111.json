@@ -1,0 +1,59 @@
+{
+  "date": "20260111",
+  "insights": [
+    {
+      "pattern": "responsibility_failure",
+      "title": "DUTY ON PAPER, NOT IN REALITY",
+      "evidence": "1 responsibility gaps detected",
+      "value_loss": [
+        "Control",
+        "Discipline",
+        "Trust"
+      ],
+      "examples": [
+        "Cluster of 14 alerts in 2min"
+      ],
+      "confidence": "MEDIUM",
+      "truth_statement": "Duty exists on paper, not in reality."
+    },
+    {
+      "pattern": "chaos_windows",
+      "title": "SYSTEM LOST CONTROL TEMPORARILY",
+      "evidence": "1 hours showed loss of control patterns",
+      "value_loss": [
+        "Control",
+        "Attention",
+        "Opportunity"
+      ],
+      "examples": [
+        {
+          "hour": "18:00",
+          "rapid_motions": 576,
+          "severity": "HIGH"
+        }
+      ],
+      "confidence": "MEDIUM",
+      "truth_statement": "System lost control temporarily."
+    }
+  ],
+  "value_loss": {
+    "Control": 2
+  },
+  "questions": [
+    {
+      "question": "Did people come and leave too fast?",
+      "answer": "YES - In hours: 18:00",
+      "implication": "Minimal engagement, maximum throughput, minimum value"
+    },
+    {
+      "question": "Was someone missing when needed?",
+      "answer": "YES - 14 unattended alerts",
+      "implication": "Presence assumed, attention absent"
+    },
+    {
+      "question": "Did alerts repeat without correction?",
+      "answer": "YES - Repeated: unattended_station, rapid_motion",
+      "implication": "System warnings ignored, patterns normalized"
+    }
+  ]
+}
