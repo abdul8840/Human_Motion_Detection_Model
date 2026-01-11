@@ -1,0 +1,4 @@
+date,zone_name,zone_type,total_entries,total_occupancy_time,avg_occupancy_time,idle_alerts_count,unattended_alerts_count,max_concurrent_persons
+2026-01-11,Counter,counter,37,65.9132513999939,1.781439227026862,0,1,8
+2026-01-11,Table,table,53,129.6849479675293,2.4468858107080997,0,1,12
+2026-01-11,Entrance,entrance,50,81.3342022895813,1.626684045791626,0,11,12

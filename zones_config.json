@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Counter",
+    "points": [
+      [
+        120,
+        330
+      ],
+      [
+        520,
+        330
+      ],
+      [
+        520,
+        430
+      ],
+      [
+        120,
+        430
+      ]
+    ],
+    "zone_type": "counter",
+    "idle_threshold": 120.0,
+    "unattended_threshold": 300.0,
+    "motion_threshold": 0.01
+  },
+  {
+    "name": "Table",
+    "points": [
+      [
+        170,
+        140
+      ],
+      [
+        470,
+        140
+      ],
+      [
+        470,
+        340
+      ],
+      [
+        170,
+        340
+      ]
+    ],
+    "zone_type": "table",
+    "idle_threshold": 180.0,
+    "unattended_threshold": 600.0,
+    "motion_threshold": 0.01
+  },
+  {
+    "name": "Entrance",
+    "points": [
+      [
+        50,
+        100
+      ],
+      [
+        250,
+        100
+      ],
+      [
+        250,
+        300
+      ],
+      [
+        50,
+        300
+      ]
+    ],
+    "zone_type": "entrance",
+    "idle_threshold": 60.0,
+    "unattended_threshold": 0.0,
+    "motion_threshold": 0.01
+  }
+]
