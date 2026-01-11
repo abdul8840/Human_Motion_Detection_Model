@@ -1,0 +1,60 @@
+============================================================
+DAILY TRUTH REPORT
+Date: January 11, 2026
+Generated: 2026-01-11 18:18:44
+============================================================
+
+📊 EXECUTIVE SUMMARY
+----------------------------------------
+• Productivity Score: 10.8/100
+• Total Detections: 3357
+• Unique Faces: 0
+• Total Alerts: 36 (36 active)
+
+📍 ZONE ANALYTICS
+----------------------------------------
+• Busiest Zone: Table
+• Total Zone Entries: 140
+• Most Idle Zone: None
+
+  Counter:
+    • Entries: 37
+    • Occupancy: 0.02 hours
+    • Idle Alerts: 0
+  Table:
+    • Entries: 53
+    • Occupancy: 0.04 hours
+    • Idle Alerts: 0
+  Entrance:
+    • Entries: 50
+    • Occupancy: 0.02 hours
+    • Idle Alerts: 0
+
+🔑 KEY METRICS
+----------------------------------------
+1. Total Unique Faces: 0
+2. Counter Unattended Time: 1438.9 minutes
+
+⏰ TOP 3 LONGEST IDLE TIMES
+----------------------------------------
+No idle alerts recorded today.
+
+📈 PRODUCTIVITY ANALYSIS
+----------------------------------------
+Score: 10.8/100
+Interpretation: ❌ LOW productivity
+Low activity and/or presence detected.
+
+🚨 ALERT SUMMARY
+----------------------------------------
+• unattended_station: 13
+• rapid_motion: 23
+
+💡 RECOMMENDATIONS
+----------------------------------------
+• Consider staffing adjustments for Counter zone
+• Review workflow and engagement strategies
+
+============================================================
+End of Report
+============================================================

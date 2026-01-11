@@ -1,0 +1,13 @@
+# requirements_fixed.txt
+# Basic packages (always required)
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Face detection (MediaPipe or fallback to OpenCV)
+mediapipe>=0.10.0
+
+# Person detection (optional - can run without)
+ultralytics>=8.0.0
+
+# For CPU-only PyTorch (to avoid DLL issues)
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
