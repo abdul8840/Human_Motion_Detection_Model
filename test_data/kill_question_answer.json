@@ -1,0 +1,44 @@
+{
+  "question": "Where did we lose value today \u2014 and why?",
+  "answer": {
+    "value_loss_points": [
+      {
+        "time": "14:30-15:45",
+        "location": "Counter zone",
+        "value_lost": "Customer wait time and potential lost sales",
+        "root_cause": "Understaffing during peak hours",
+        "evidence": {
+          "motion_score": 0.35,
+          "face_count": 1,
+          "detection_count": 125,
+          "comparison": "75% higher motion than average with 60% fewer staff"
+        },
+        "quantification": "Estimated 45 minutes of cumulative wait time",
+        "solution": "Add one additional staff member during 14:00-16:00",
+        "expected_improvement": "Reduce wait times by 40%"
+      },
+      {
+        "time": "11:15-11:45",
+        "location": "Entrance area",
+        "value_lost": "Poor customer experience and flow efficiency",
+        "root_cause": "Layout causing blockage/crowding",
+        "evidence": {
+          "face_count": 4.2,
+          "motion_score": 0.08,
+          "dwell_time": "2.5x longer than average"
+        },
+        "quantification": "30 minutes of inefficient flow",
+        "solution": "Redesign entrance layout and add queuing guidance",
+        "expected_improvement": "Improve flow by 50%"
+      }
+    ],
+    "total_value_loss": "Approximately 75 minutes of operational inefficiency",
+    "primary_pattern": "Staffing and layout issues during peak hours",
+    "action_plan": [
+      "Immediate: Adjust afternoon staffing schedule",
+      "Short-term: Review and redesign entrance layout",
+      "Long-term: Implement predictive staffing based on historical patterns"
+    ],
+    "confidence": "High - based on consistent patterns and quantitative evidence"
+  }
+}

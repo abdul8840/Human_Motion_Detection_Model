@@ -1,0 +1,3 @@
+timestamp,object_id,object_type,zone_name,confidence,x,y,width,height,motion_score
+2024-01-01 10:00:00.123456,1,person,Counter,0.85,100,150,50,100,0.25
+2024-01-01 10:00:01.123456,2,face,Counter,0.92,120,160,30,30,0.15

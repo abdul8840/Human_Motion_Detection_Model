@@ -8,18 +8,19 @@ from typing import Dict, List, Tuple, Any, Optional
 import json
 
 class BottleneckDetectorFixed:
-    """Fixed Bottleneck Detector that works with Picam CSV data."""
+    """Fixed Bottleneck Detector with PASSIVE bottleneck detection."""
     
     def __init__(self, reports_dir: str = "picam_reports"):
         self.reports_dir = reports_dir
         self.today = date.today()
         self.today_str = self.today.strftime("%Y%m%d")
         
-        # Simplified configuration
+        # Optimized configuration
         self.config = {
             'time_window_minutes': 15,
-            'high_motion_threshold': 0.2,
-            'low_motion_threshold': 0.05,
+            'high_motion_threshold': 0.25,     # For understaffed detection
+            'very_low_motion_threshold': 0.05,  # For traditional blockage
+            'passive_motion_max': 0.08,         # NEW: For passive bottlenecks
             'high_face_threshold': 3,
             'low_face_threshold': 1,
             'min_duration_minutes': 10
@@ -30,7 +31,7 @@ class BottleneckDetectorFixed:
     def analyze_today(self):
         """Main analysis function."""
         print(f"\n{'='*60}")
-        print("BOTTLENECK ANALYSIS")
+        print("BOTTLENECK ANALYSIS WITH PASSIVE DETECTION")
         print(f"Date: {self.today.strftime('%Y-%m-%d')}")
         print(f"{'='*60}")
         
@@ -48,7 +49,7 @@ class BottleneckDetectorFixed:
         # Create hourly analysis
         hourly_data = self._create_hourly_analysis(data)
         
-        # Detect bottlenecks
+        # Detect bottlenecks (now includes passive)
         bottlenecks = self._detect_all_bottlenecks(hourly_data, data['alerts'])
         
         if not bottlenecks:
@@ -59,7 +60,7 @@ class BottleneckDetectorFixed:
         # Generate and save report
         report = self._generate_report(bottlenecks, hourly_data)
         print(f"\n{'='*60}")
-        print("BOTTLENECK REPORT")
+        print("BOTTLENECK REPORT (WITH PASSIVE DETECTION)")
         print(f"{'='*60}")
         print(report)
         
@@ -170,28 +171,36 @@ class BottleneckDetectorFixed:
         return hourly_stats
     
     def _detect_all_bottlenecks(self, hourly_data: Dict, alerts: List) -> List[Dict]:
-        """Detect all types of bottlenecks."""
+        """Detect all types of bottlenecks, including PASSIVE."""
         bottlenecks = []
         
         print(f"\nAnalyzing {len(hourly_data)} hours of data...")
         
-        # 1. Detect understaffed hours
+        # 1. Detect understaffed hours (high motion, low faces)
         understaffed = self._detect_understaffed_hours(hourly_data)
         bottlenecks.extend(understaffed)
         
-        # 2. Detect blockage hours
+        # 2. Detect traditional blockage hours (very low motion, high faces)
         blockages = self._detect_blockage_hours(hourly_data)
         bottlenecks.extend(blockages)
         
-        # 3. Detect choke points (zones)
+        # 3. Detect PASSIVE bottlenecks (low motion, high faces) - NEW
+        passive_bottlenecks = self._detect_passive_bottlenecks(hourly_data)
+        bottlenecks.extend(passive_bottlenecks)
+        
+        # 4. Detect choke points (zones with sustained high occupancy)
         choke_points = self._detect_choke_points(hourly_data)
         bottlenecks.extend(choke_points)
         
-        # 4. Detect idle clusters from alerts
+        # 5. Detect idle clusters from alerts
         idle_clusters = self._detect_idle_clusters(alerts)
         bottlenecks.extend(idle_clusters)
         
-        # Sort by severity
+        # Sort by severity (passive bottlenecks get priority as they're more insidious)
+        for bottleneck in bottlenecks:
+            if bottleneck['type'] == 'passive_bottleneck':
+                bottleneck['severity_score'] *= 1.5  # Boost passive bottleneck severity
+        
         bottlenecks.sort(key=lambda x: x.get('severity_score', 0), reverse=True)
         
         return bottlenecks
@@ -204,7 +213,7 @@ class BottleneckDetectorFixed:
             if (stats['avg_motion'] > self.config['high_motion_threshold'] and
                 stats['face_count'] <= self.config['low_face_threshold']):
                 
-                severity_score = stats['avg_motion'] * 10  # Higher motion = more severe
+                severity_score = stats['avg_motion'] * 10
                 
                 bottlenecks.append({
                     'type': 'understaffed',
@@ -215,6 +224,7 @@ class BottleneckDetectorFixed:
                     'severity': self._get_severity(severity_score),
                     'severity_score': severity_score,
                     'description': f"High activity ({stats['avg_motion']:.3f} motion) with only {stats['face_count']} faces",
+                    'behavioral_truth': "Staff overwhelmed, tasks not completed",
                     'recommendations': [
                         "Consider adding staff during this hour",
                         "Review task allocation",
@@ -225,14 +235,14 @@ class BottleneckDetectorFixed:
         return bottlenecks
     
     def _detect_blockage_hours(self, hourly_data: Dict) -> List[Dict]:
-        """Detect hours with high face count but low motion."""
+        """Detect hours with high face count but VERY low motion (<0.05)."""
         bottlenecks = []
         
         for hour, stats in hourly_data.items():
             if (stats['face_count'] >= self.config['high_face_threshold'] and
-                stats['avg_motion'] < self.config['low_motion_threshold']):
+                stats['avg_motion'] < self.config['very_low_motion_threshold']):
                 
-                severity_score = stats['face_count'] * 3  # More faces = more severe
+                severity_score = stats['face_count'] * 3
                 
                 bottlenecks.append({
                     'type': 'blockage',
@@ -242,12 +252,58 @@ class BottleneckDetectorFixed:
                     'motion_score': round(stats['avg_motion'], 3),
                     'severity': self._get_severity(severity_score),
                     'severity_score': severity_score,
-                    'description': f"Crowded ({stats['face_count']} faces) with low movement ({stats['avg_motion']:.3f} motion)",
+                    'description': f"Severe congestion: {stats['face_count']} faces, extremely low movement ({stats['avg_motion']:.3f} motion)",
+                    'behavioral_truth': "Clear obstruction or complete stoppage",
                     'recommendations': [
-                        "Review layout and flow",
+                        "Review layout and flow - possible physical blockage",
                         "Consider queuing systems",
-                        "Check for physical obstructions"
+                        "Check for equipment failures"
                     ]
+                })
+        
+        return bottlenecks
+    
+    def _detect_passive_bottlenecks(self, hourly_data: Dict) -> List[Dict]:
+        """NEW: Detect passive bottlenecks (0.05-0.08 motion with high faces)."""
+        bottlenecks = []
+        
+        PASSIVE_FACE_THRESHOLD = 3
+        PASSIVE_MOTION_MIN = 0.05
+        PASSIVE_MOTION_MAX = self.config['passive_motion_max']
+        
+        for hour, stats in hourly_data.items():
+            # People present but little happening (silent value loss)
+            if (stats['face_count'] >= PASSIVE_FACE_THRESHOLD and
+                PASSIVE_MOTION_MIN <= stats['avg_motion'] < PASSIVE_MOTION_MAX):
+                
+                # Higher severity weight - passive bottlenecks are insidious
+                severity_score = stats['face_count'] * 5
+                
+                bottlenecks.append({
+                    'type': 'passive_bottleneck',
+                    'hour': hour.strftime('%H:%M'),
+                    'duration': '1 hour',
+                    'face_count': stats['face_count'],
+                    'motion_score': round(stats['avg_motion'], 3),
+                    'severity': self._get_severity(severity_score),
+                    'severity_score': severity_score,
+                    'behavioral_truth': "PEOPLE PRESENT BUT NOT MOVING - VALUE SILENTLY LEAKING",
+                    'description': f"⚠️ SILENT CONGESTION: {stats['face_count']} faces present, "
+                                 f"minimal movement ({stats['avg_motion']:.3f} motion)",
+                    'likely_causes': [
+                        "Decision paralysis / confusion",
+                        "Waiting for unclear instructions",
+                        "Uncertain workflow next steps",
+                        "Silent coordination breakdown"
+                    ],
+                    'recommendations': [
+                        "IMMEDIATE: Investigate silent waiting/confusion",
+                        "Review process clarity and instructions",
+                        "Implement activity checkpoints every 15 minutes",
+                        "Assign clear task ownership",
+                        "This is often decision paralysis - provide guidance"
+                    ],
+                    'priority': 'HIGH'  # Explicit priority flag
                 })
         
         return bottlenecks
@@ -370,22 +426,22 @@ class BottleneckDetectorFixed:
     
     def _get_severity(self, score: float) -> str:
         """Convert score to severity level."""
-        if score >= 20:
-            return 'critical'
-        elif score >= 15:
-            return 'high'
-        elif score >= 10:
-            return 'medium'
+        if score >= 25:
+            return 'CRITICAL'
+        elif score >= 18:
+            return 'HIGH'
+        elif score >= 12:
+            return 'MEDIUM'
         else:
-            return 'low'
+            return 'LOW'
     
     def _generate_report(self, bottlenecks: List[Dict], hourly_data: Dict) -> str:
         """Generate comprehensive bottleneck report."""
         report_lines = []
         
-        report_lines.append(f"BOTTLENECK ANALYSIS REPORT")
+        report_lines.append(f"BOTTLENECK ANALYSIS REPORT (WITH PASSIVE DETECTION)")
         report_lines.append(f"Date: {self.today.strftime('%Y-%m-%d')}")
-        report_lines.append(f"Generated: {datetime.now().strftime('%H:%M:%S')}")
+        report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")  # Full timestamp
         report_lines.append(f"="*60)
         
         # Summary
@@ -394,7 +450,7 @@ class BottleneckDetectorFixed:
         report_lines.append(f"Total hours analyzed: {len(hourly_data)}")
         report_lines.append(f"Total bottlenecks detected: {len(bottlenecks)}")
         
-        # Count by type
+        # Count by type (highlight passive bottlenecks)
         type_counts = defaultdict(int)
         severity_counts = defaultdict(int)
         
@@ -404,38 +460,44 @@ class BottleneckDetectorFixed:
         
         if type_counts:
             report_lines.append(f"\nBottleneck types:")
-            for b_type, count in type_counts.items():
-                report_lines.append(f"  • {b_type}: {count}")
+            for b_type, count in sorted(type_counts.items()):
+                indicator = "⚠️ " if b_type == 'passive_bottleneck' else "• "
+                report_lines.append(f"  {indicator}{b_type}: {count}")
         
         if severity_counts:
             report_lines.append(f"\nSeverity levels:")
             for severity, count in severity_counts.items():
                 report_lines.append(f"  • {severity}: {count}")
         
-        # Hourly statistics
-        if hourly_data:
-            report_lines.append(f"\n📈 HOURLY STATISTICS")
+        # Highlight passive bottlenecks first
+        passive_bottlenecks = [b for b in bottlenecks if b['type'] == 'passive_bottleneck']
+        if passive_bottlenecks:
+            report_lines.append(f"\n🚨 CRITICAL FINDING: {len(passive_bottlenecks)} PASSIVE BOTTLENECKS DETECTED")
+            report_lines.append(f"These represent SILENT VALUE LEAKAGE - people present but not productive")
             report_lines.append(f"-"*40)
-            
-            for hour, stats in sorted(hourly_data.items()):
-                hour_str = hour.strftime('%H:%M')
-                report_lines.append(
-                    f"{hour_str}: {stats['face_count']} faces, "
-                    f"{stats['person_count']} persons, "
-                    f"{stats['avg_motion']:.3f} motion"
-                )
         
-        # Detailed bottlenecks
+        # Detailed bottlenecks (passive first, then others)
         if bottlenecks:
-            report_lines.append(f"\n🔍 DETECTED BOTTLENECKS")
+            report_lines.append(f"\n🔍 DETECTED BOTTLENECKS (PRIORITY ORDER)")
             report_lines.append(f"-"*40)
             
-            for i, bottleneck in enumerate(bottlenecks, 1):
-                report_lines.append(f"\n{i}. {bottleneck['type'].upper()} ({bottleneck['severity'].upper()})")
-                report_lines.append(f"   Time: {bottleneck.get('hour', bottleneck.get('time_range', bottleneck.get('hours', 'N/A')))}")
+            # Sort: passive first, then by severity
+            sorted_bottlenecks = sorted(
+                bottlenecks,
+                key=lambda x: (0 if x['type'] == 'passive_bottleneck' else 1, -x['severity_score'])
+            )
+            
+            for i, bottleneck in enumerate(sorted_bottlenecks, 1):
+                if bottleneck['type'] == 'passive_bottleneck':
+                    report_lines.append(f"\n{i}. 🚨 {bottleneck['type'].upper()} ({bottleneck['severity']})")
+                    report_lines.append(f"   ⏰ Time: {bottleneck.get('hour', bottleneck.get('time_range', 'N/A'))}")
+                else:
+                    report_lines.append(f"\n{i}. {bottleneck['type'].upper()} ({bottleneck['severity']})")
+                    report_lines.append(f"   Time: {bottleneck.get('hour', bottleneck.get('time_range', bottleneck.get('hours', 'N/A')))}")
+                
                 report_lines.append(f"   Duration: {bottleneck['duration']}")
                 
-                if bottleneck['type'] in ['understaffed', 'blockage']:
+                if bottleneck['type'] in ['understaffed', 'blockage', 'passive_bottleneck']:
                     report_lines.append(f"   Motion Score: {bottleneck.get('motion_score', 'N/A')}")
                     report_lines.append(f"   Face Count: {bottleneck.get('face_count', 'N/A')}")
                 
@@ -443,8 +505,12 @@ class BottleneckDetectorFixed:
                     report_lines.append(f"   Zone: {bottleneck['zone']}")
                 
                 report_lines.append(f"   Description: {bottleneck['description']}")
+                
+                if 'behavioral_truth' in bottleneck:
+                    report_lines.append(f"   Behavioral Truth: {bottleneck['behavioral_truth']}")
+                
                 report_lines.append(f"   Recommendations:")
-                for rec in bottleneck['recommendations'][:2]:  # Show top 2
+                for rec in bottleneck['recommendations'][:3]:
                     report_lines.append(f"     • {rec}")
         
         # Overall recommendations
@@ -454,18 +520,27 @@ class BottleneckDetectorFixed:
         if not bottlenecks:
             report_lines.append("No specific actions needed. Operations appear efficient.")
         else:
-            # Generate overall recommendations
+            # Generate overall recommendations, prioritizing passive bottleneck fixes
             all_recommendations = []
             for bottleneck in bottlenecks:
-                all_recommendations.extend(bottleneck['recommendations'])
+                if bottleneck['type'] == 'passive_bottleneck':
+                    # Add all passive bottleneck recs first
+                    all_recommendations.extend(bottleneck['recommendations'])
+                else:
+                    all_recommendations.extend(bottleneck['recommendations'][:2])
             
             # Get unique recommendations
-            unique_recs = list(dict.fromkeys(all_recommendations))
+            unique_recs = []
+            for rec in all_recommendations:
+                if rec not in unique_recs:
+                    unique_recs.append(rec)
             
-            for i, rec in enumerate(unique_recs[:5], 1):  # Top 5
-                report_lines.append(f"{i}. {rec}")
+            for i, rec in enumerate(unique_recs[:5], 1):
+                priority = "🚨 " if any(word in rec.lower() for word in ['immediate', 'critical', 'silent', 'passive']) else ""
+                report_lines.append(f"{i}. {priority}{rec}")
         
         report_lines.append(f"\n" + "="*60)
+        report_lines.append(f"Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         report_lines.append("End of Report")
         
         return "\n".join(report_lines)
@@ -493,9 +568,9 @@ class BottleneckDetectorFixed:
 def main():
     """Main function."""
     print(f"\n{'='*60}")
-    print("SIMPLE BOTTLENECK DETECTOR")
+    print("ADVANCED BOTTLENECK DETECTOR WITH PASSIVE DETECTION")
     print(f"{'='*60}")
-    print("This version works with your Picam CSV data structure.")
+    print("Now detects silent value leakage (passive bottlenecks)")
     
     detector = BottleneckDetectorFixed()
     detector.analyze_today()

@@ -1,0 +1,17 @@
+{
+  "date": "2026-01-11",
+  "summary": {
+    "total_detections": 42,
+    "unique_faces": 15,
+    "productivity_score": 78.5
+  },
+  "bottlenecks": [
+    {
+      "type": "understaffed",
+      "time": "14:30-15:45",
+      "duration_minutes": 75,
+      "zone": "Counter"
+    }
+  ],
+  "generated_at": "2026-01-11T20:00:09.640042"
+}

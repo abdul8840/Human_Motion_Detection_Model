@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Reception",
+    "points": [[100, 100], [400, 100], [400, 300], [100, 300]],
+    "zone_type": "high_risk",
+    "idle_threshold": 180,
+    "motion_threshold": 0.02,
+    "description": "Hotel reception counter"
+  },
+  {
+    "name": "Lobby Entrance",
+    "points": [[50, 50], [300, 50], [300, 200], [50, 200]],
+    "zone_type": "entrance",
+    "idle_threshold": 120,
+    "motion_threshold": 0.03,
+    "description": "Main lobby entrance"
+  },
+  {
+    "name": "Restaurant",
+    "points": [[500, 200], [800, 200], [800, 500], [500, 500]],
+    "zone_type": "medium_risk",
+    "idle_threshold": 300,
+    "motion_threshold": 0.05,
+    "description": "Hotel restaurant area"
+  }
+]

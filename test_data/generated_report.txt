@@ -1,0 +1,33 @@
+============================================================
+DAILY TRUTH REPORT
+Date: 2024-01-01
+============================================================
+
+EXECUTIVE SUMMARY
+----------------------------------------
+* Total Detections: 125
+* Unique Faces: 42
+* Total Persons: 89
+* Counter Unattended: 45.5 minutes
+* Productivity Score: 78.5/100
+
+DETECTED BOTTLENECKS
+----------------------------------------
+1. UNDERSTAFFED (75 minutes)
+   Time: 14:30-15:45
+   Zone: Counter
+   Description: High activity with insufficient staff
+
+2. BLOCKAGE (30 minutes)
+   Time: 11:15-11:45
+   Zone: Entrance
+   Description: Crowding with low movement
+
+RECOMMENDED ACTIONS
+----------------------------------------
+* Adjust staff schedule for afternoon peak
+* Monitor entrance flow during 11:00-12:00
+* Review morning staffing needs
+
+============================================================
+End of Report

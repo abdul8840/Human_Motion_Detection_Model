@@ -1,0 +1,30 @@
+{
+  "date": "2026-01-11",
+  "executive_summary": {
+    "key_finding": "Operational inefficiencies cost ~2 hours of productive time today",
+    "primary_issue": "Staffing mismatch during peak hours",
+    "potential_savings": "Could reduce wait times by 40% with proper staffing",
+    "confidence_level": "High (based on consistent data patterns)"
+  },
+  "actionable_insights": [
+    "Add staff at 14:00-16:00 to handle afternoon peak",
+    "Redesign entrance layout to prevent crowding at 11:00-12:00",
+    "Monitor Table zone for idle staff during slow periods"
+  ],
+  "data_backing": {
+    "hours_analyzed": 8,
+    "total_detections": 245,
+    "bottlenecks_identified": 3,
+    "quantitative_evidence": "All recommendations based on motion and face count data"
+  },
+  "next_steps": [
+    "Immediate: Adjust tomorrow's schedule based on today's patterns",
+    "This week: Test new entrance layout",
+    "This month: Implement automated scheduling recommendations"
+  ],
+  "risk_assessment": {
+    "doing_nothing": "Continued customer dissatisfaction and lost revenue",
+    "implementing_changes": "Minimal cost with high potential ROI",
+    "monitoring_needed": "Track customer wait times and satisfaction"
+  }
+}
